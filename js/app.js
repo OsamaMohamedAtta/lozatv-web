@@ -42,7 +42,7 @@ async function login(e) {
     const data = await apiRequest("/user/login", {
       method: "POST",
       body: JSON.stringify({
-        macAddress: $("#macAddress").value.trim(),
+        macAddress: $("#macAddress").value.trim().toLowerCase(),
         deviceKey: $("#deviceKey").value.trim()
       })
     });
