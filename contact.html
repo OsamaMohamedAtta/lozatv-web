@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LozaTV — Contact Us</title>
+    <link rel="icon" type="image/png" href="./assets/logo.png">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <header class="site-header"><a class="brand" href="index.html"><img src="./assets/logo.png" alt="logo"></a>
+        <nav class="desktop-nav"><a href="index.html">Home</a><a href="dashboard.html">My Player</a></nav>
+    </header>
+    <main class="contact-page">
+        <div class="contact-copy"><span class="eyebrow">GET IN TOUCH</span>
+            <h1>Let's talk about <em>LozaTV.</em></h1>
+            <p>Have a question about your player, playlist setup or app? Send us a message and we'll get back to you.
+            </p>
+            <div class="contact-cards">
+                <div><span>✉</span><b>Email</b>
+                    <p>support@lozatv.com</p>
+                </div>
+                <div><span>⌁</span><b>Support</b>
+                    <p>Available for player setup questions.</p>
+                </div>
+            </div>
+        </div>
+        <form class="contact-form"
+            onsubmit="event.preventDefault(); alert('Thank you! Connect this form to your email service or backend.');">
+            <label>Name<input required placeholder="Your name"></label><label>Email<input required type="email"
+                    placeholder="you@example.com"></label><label>Message<textarea required rows="6"
+                    placeholder="How can we help?"></textarea></label><button class="btn btn-primary full">Send Message
+                →</button>
+        </form>
+    </main>
+    <footer class="footer">
+        <div class="footer-bottom"><span>© <span id="year"></span> LozaTV. All rights reserved.</span><span><a
+                    href="privacy.html">Privacy</a> · <a href="terms.html">Terms</a></span></div>
+    </footer>
+    <script>document.getElementById('year').textContent = 2022</script>
+</body>
+
+</html>
