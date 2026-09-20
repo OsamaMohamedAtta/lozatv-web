@@ -32,6 +32,25 @@ function showLogin() {
   $("#logoutBtn").classList.add("hidden");
 }
 
+const macInput = document.getElementById("macAddress");
+
+if (macInput) {
+  macInput.addEventListener("input", function (e) {
+    let value = e.target.value;
+
+    // Remove everything except hexadecimal characters
+    value = value.replace(/[^a-zA-Z0-9]/g, "");
+
+    // Maximum 20 characters
+    value = value.substring(0, 20);
+
+    // Add : after every 2 characters
+    value = value.match(/.{1,2}/g)?.join(":") || "";
+
+    e.target.value = value.toLowerCase();
+  });
+}
+
 async function login(e) {
   e.preventDefault();
   const error = $("#loginError");
@@ -79,7 +98,7 @@ function renderUser(info) {
   `;
 }
 
-{/* <div><small>VALID UNTIL</small><strong>${formatDate(info.endDate)}</strong></div> */}
+{/* <div><small>VALID UNTIL</small><strong>${formatDate(info.endDate)}</strong></div> */ }
 
 function renderPlaylists() {
   const grid = $("#playlistGrid");
