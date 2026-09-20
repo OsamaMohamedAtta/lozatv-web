@@ -46,8 +46,6 @@ if (macInput) {
 
     // Add : after every 2 characters
     value = value.match(/.{1,2}/g)?.join(":") || "";
-
-    e.target.value = value.toLowerCase();
   });
 }
 
