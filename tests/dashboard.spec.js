@@ -39,6 +39,7 @@ async function mockApi(page, overrides = {}) {
       const body = JSON.parse(req.postData());
       return body.deviceKey === "good-key" ? json(200, { token: "token-123" }) : json(404, { message: "User not found" });
     }
+    if (state.blocked && (p === "/user/userInfo" || p === "/playList/get")) return json(403, { message: "This user is not subscription" });
     if (p === "/user/userInfo") return json(200, state.user);
     if (p === "/playList/get") return json(200, { allPlaylists: [{ _id: "p1", name: "My List", url: "https://example.com/list.m3u", isActive: true }] });
     if (p.startsWith("/payment/") && !state.paymentsDeployed) return json(404, { message: "Not found" });
@@ -212,4 +213,26 @@ test("layout has no horizontal overflow", async ({ page }) => {
   await expect(page.locator(".plan-card")).toHaveCount(2);
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
   expect(overflow).toBeLessThanOrEqual(0);
+});
+
+test("expired users (blocked by isUser) can still sign in, see their status and renew", async ({ page }) => {
+  const state = await mockApi(page, {
+    blocked: true,
+    subscription: { macAddress: "aa:bb:cc:dd:ee:ff", active: false, isSubscribed: false, plan: null, isLifetime: false, isTrialActive: false, startDate: "2025-01-01", endDate: "2025-09-01", expired: true }
+  });
+  await page.goto("/dashboard.html");
+  await page.fill("#macAddress", "aa:bb:cc:dd:ee:ff");
+  await page.fill("#deviceKey", "good-key");
+  await page.click("#loginForm button[type=submit]");
+  await expect(page.locator("#appView")).toBeVisible();
+  await expect(page.locator("#userInfo")).toContainText("aa:bb:cc:dd:ee:ff");
+  await expect(page.locator("#userInfo")).toContainText("Expired");
+  await expect(page.locator("#subscriptionDetails")).toContainText("Expired");
+  await expect(page.locator("#playlistsLocked")).toBeVisible();
+  await expect(page.locator("#openAdd")).toBeHidden();
+  await expect(page.locator("#emptyState")).toBeHidden();
+  await page.click("[data-plan=yearly]");
+  await page.click("#payConfirm");
+  await page.waitForURL("https://secure-egypt.paytabs.com/**");
+  expect(state.requests.filter((r) => r.path === "/payment/checkout")).toHaveLength(1);
 });

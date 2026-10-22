@@ -3,6 +3,7 @@ const $$ = (s) => document.querySelectorAll(s);
 
 let playlists = [];
 let editingId = null;
+let playlistsLocked = false;
 
 document.addEventListener("DOMContentLoaded", async () => {
   if (!$("#loginView")) return;
@@ -75,11 +76,20 @@ async function login(e) {
 }
 
 async function loadDashboard() {
-  const [info, list] = await Promise.all([
+  const [infoResult, listResult] = await Promise.allSettled([
     apiRequest("/user/userInfo"),
     apiRequest("/playList/get")
   ]);
-  playlists = list.allPlaylists || [];
+  let info;
+  if (infoResult.status === "fulfilled") info = infoResult.value;
+  else if (infoResult.reason.status === 403) {
+    // Trial or subscription ended: the backend blocks /user/userInfo, but the
+    // account can still sign in to see its status and renew.
+    info = (await apiRequest("/payment/subscription")).subscription;
+  } else throw infoResult.reason;
+  if (listResult.status === "rejected" && listResult.reason.status !== 403) throw listResult.reason;
+  playlistsLocked = listResult.status === "rejected";
+  playlists = playlistsLocked ? [] : listResult.value.allPlaylists || [];
   $("#loginView").classList.add("hidden");
   $("#appView").classList.remove("hidden");
   $("#logoutBtn").classList.remove("hidden");
@@ -88,13 +98,12 @@ async function loadDashboard() {
   if (typeof loadSubscription === "function") loadSubscription(info);
 }
 
-function renderUser(info) {
-  const sub = subscriptionFromUserInfo(info);
+function renderUser(info, sub = subscriptionFromUserInfo(info)) {
   const status = sub.active
     ? `<span class="status active">● Active</span>`
-    : info.isTrialActive
+    : sub.isTrialActive
       ? `<span class="status active">● Trial</span>`
-      : `<span class="status inactive">● ${info.isSubscribed ? "Expired" : "Not subscribed"}</span>`;
+      : `<span class="status inactive">● ${sub.isSubscribed || sub.expired ? "Expired" : "Not subscribed"}</span>`;
   const validUntil = sub.active ? (sub.isLifetime ? "Lifetime" : sub.endDate ? formatDate(sub.endDate) : "—") : null;
   $("#userInfo").innerHTML = `
     <div><small>PLAYER MAC ADDRESS</small><strong>${escapeHtml(info.macAddress || "—")}</strong></div>
@@ -111,6 +120,7 @@ function isLifetimeDate(v) {
 }
 
 function subscriptionFromUserInfo(info) {
+  if (typeof info.active === "boolean") return info; // already a backend summary (/payment/subscription)
   const end = info.endDate ? new Date(info.endDate) : null;
   const active = Boolean(info.isSubscribed) && (!end || isNaN(end) || end > new Date());
   const isLifetime = active && isLifetimeDate(info.endDate);
@@ -119,7 +129,9 @@ function subscriptionFromUserInfo(info) {
 
 function renderPlaylists() {
   const grid = $("#playlistGrid");
-  $("#emptyState").classList.toggle("hidden", playlists.length !== 0);
+  $("#playlistsLocked").classList.toggle("hidden", !playlistsLocked);
+  $("#openAdd").classList.toggle("hidden", playlistsLocked);
+  $("#emptyState").classList.toggle("hidden", playlists.length !== 0 || playlistsLocked);
   grid.classList.toggle("hidden", playlists.length === 0);
   grid.innerHTML = playlists.map((p, i) => `
     <article class="playlist-card">
