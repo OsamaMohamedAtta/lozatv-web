@@ -34,7 +34,10 @@ async function loadSubscription(info) {
     apiRequest("/payment/plans"),
     apiRequest("/payment/orders")
   ]);
-  if (summary.status === "fulfilled" && summary.value.subscription) currentSubscription = summary.value.subscription;
+  if (summary.status === "fulfilled" && summary.value.subscription) {
+    currentSubscription = summary.value.subscription;
+    renderUser(info, currentSubscription);
+  }
   subscriptionPlans = plans.status === "fulfilled" && plans.value.available ? plans.value.plans || [] : [];
   renderSubscription();
   renderPlans();
@@ -49,7 +52,7 @@ function renderSubscription() {
   if (s.active && s.isLifetime) badge = `<span class="sub-badge success">● Lifetime — never expires</span>`;
   else if (s.active) badge = `<span class="sub-badge success">● Active</span>`;
   else if (s.isTrialActive) badge = `<span class="sub-badge pending">● Free trial</span>`;
-  else if (s.isSubscribed) badge = `<span class="sub-badge error">● Expired</span>`;
+  else if (s.isSubscribed || s.expired) badge = `<span class="sub-badge error">● Expired</span>`;
   else badge = `<span class="sub-badge muted">● No active subscription</span>`;
 
   const plan = s.active ? PLAN_LABELS[s.plan] || "Active plan" : s.isTrialActive ? PLAN_LABELS.trial : "—";
