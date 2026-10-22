@@ -85,20 +85,37 @@ async function loadDashboard() {
   $("#logoutBtn").classList.remove("hidden");
   renderUser(info);
   renderPlaylists();
+  if (typeof loadSubscription === "function") loadSubscription(info);
 }
 
 function renderUser(info) {
-  const status = info.isSubscribed
+  const sub = subscriptionFromUserInfo(info);
+  const status = sub.active
     ? `<span class="status active">● Active</span>`
-    : `<span class="status inactive">● Not subscribed</span>`;
+    : info.isTrialActive
+      ? `<span class="status active">● Trial</span>`
+      : `<span class="status inactive">● ${info.isSubscribed ? "Expired" : "Not subscribed"}</span>`;
+  const validUntil = sub.active ? (sub.isLifetime ? "Lifetime" : sub.endDate ? formatDate(sub.endDate) : "—") : null;
   $("#userInfo").innerHTML = `
     <div><small>PLAYER MAC ADDRESS</small><strong>${escapeHtml(info.macAddress || "—")}</strong></div>
     <div><small>SUBSCRIPTION</small>${status}</div>
-    ${info.isSubscribed ? `<div><small>VALID UNTIL</small><strong>Forever</strong></div>` : ""}
+    ${validUntil ? `<div><small>VALID UNTIL</small><strong>${escapeHtml(validUntil)}</strong></div>` : ""}
   `;
 }
 
-{/* <div><small>VALID UNTIL</small><strong>${formatDate(info.endDate)}</strong></div> */ }
+// Lifetime subscriptions are stored with an end date ~100 years ahead.
+function isLifetimeDate(v) {
+  if (!v) return false;
+  const limit = new Date(); limit.setFullYear(limit.getFullYear() + 50);
+  return new Date(v) > limit;
+}
+
+function subscriptionFromUserInfo(info) {
+  const end = info.endDate ? new Date(info.endDate) : null;
+  const active = Boolean(info.isSubscribed) && (!end || isNaN(end) || end > new Date());
+  const isLifetime = active && isLifetimeDate(info.endDate);
+  return { active, isLifetime, plan: isLifetime ? "lifetime" : null, startDate: info.startDate || null, endDate: isLifetime ? null : info.endDate || null, isTrialActive: Boolean(info.isTrialActive), isSubscribed: Boolean(info.isSubscribed) };
+}
 
 function renderPlaylists() {
   const grid = $("#playlistGrid");

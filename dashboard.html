@@ -42,6 +42,52 @@
       </div>
 
       <div id="userInfo" class="account-banner"></div>
+
+      <div id="paymentNotice" class="payment-notice hidden" role="status" aria-live="polite"></div>
+
+      <section class="subscription-section" aria-labelledby="subscriptionTitle">
+        <div class="subscription-grid">
+          <article class="sub-card sub-status-card">
+            <span class="eyebrow">MY SUBSCRIPTION</span>
+            <h2 id="subscriptionTitle">Subscription</h2>
+            <div id="subscriptionDetails" class="sub-details"></div>
+          </article>
+
+          <article class="sub-card reseller-card">
+            <span class="eyebrow">RESELLER PROGRAM</span>
+            <h3>Become a Reseller — <em>Free</em></h3>
+            <p>Joining the LozaTV reseller program is free. Contact our support team on WhatsApp to learn how the
+              program works and request access. Your account is reviewed and activated by our team.</p>
+            <a id="resellerLink" class="btn btn-whatsapp full" target="_blank" rel="noopener noreferrer"
+              href="https://wa.me/971502600682?text=Hello%2C%20I%20would%20like%20to%20join%20the%20IPTV%20Reseller%20Program.%20Please%20provide%20me%20with%20the%20details.">
+              Contact us on WhatsApp</a>
+          </article>
+        </div>
+
+        <div id="plansSection" class="hidden">
+          <div class="plans-head">
+            <div><span class="eyebrow">PLANS</span>
+              <h3>Choose your plan</h3>
+            </div>
+            <p>Prices are in Egyptian Pounds (EGP). Payment is processed securely by PayTabs.</p>
+          </div>
+          <div id="plansGrid" class="plans-grid"></div>
+        </div>
+
+        <div id="paymentHistory" class="payment-history hidden">
+          <h3>Payment history</h3>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th>Date</th><th>Plan</th><th>Amount</th><th>Status</th></tr>
+              </thead>
+              <tbody id="paymentRows"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <div class="section-label"><span class="eyebrow">MY PLAYLISTS</span></div>
       <div id="playlistGrid" class="playlist-grid"></div>
       <div id="emptyState" class="empty-state hidden">
         <div class="empty-icon">+</div>
@@ -71,9 +117,28 @@
     </div>
   </div>
 
+  <div id="payModal" class="modal hidden">
+    <div class="modal-backdrop" data-close="pay"></div>
+    <div class="modal-card">
+      <button class="modal-close" data-close="pay">×</button>
+      <span class="eyebrow">CHECKOUT</span>
+      <h2 id="payTitle">Confirm your plan</h2>
+      <div class="pay-summary">
+        <div><small>PLAN</small><strong id="payPlan">—</strong></div>
+        <div><small>DURATION</small><strong id="payDuration">—</strong></div>
+        <div><small>AMOUNT TO PAY</small><strong id="payAmount">—</strong></div>
+      </div>
+      <p class="pay-note">You will be redirected to the secure PayTabs payment page. Your subscription is activated
+        automatically once the payment is confirmed.</p>
+      <div id="payMessage" class="form-message"></div>
+      <button class="btn btn-primary full" type="button" id="payConfirm">Continue to secure payment</button>
+    </div>
+  </div>
+
   <div id="toast" class="toast"></div>
   <script src="js/api.js"></script>
   <script src="js/app.js"></script>
+  <script src="js/subscription.js"></script>
 
   <!-- whatsapp float icon -->
   <a href="https://wa.me/971502600682" class="whatsapp-float" target="_blank" rel="noopener noreferrer"
