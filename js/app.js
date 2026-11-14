@@ -103,7 +103,7 @@ function renderUser(info, sub = subscriptionFromUserInfo(info)) {
     ? `<span class="status active">● Active</span>`
     : sub.isTrialActive
       ? `<span class="status active">● Trial</span>`
-      : `<span class="status inactive">● ${sub.isSubscribed || sub.expired ? "Lifetime" : "Lifetime"}</span>`;
+      : `<span class="status active">● ${sub.isSubscribed || sub.expired ? "Lifetime" : "Lifetime"}</span>`;
   const validUntil = sub.active ? (sub.isLifetime ? "Lifetime" : sub.endDate ? formatDate(sub.endDate) : "—") : null;
   $("#userInfo").innerHTML = `
     <div><small>PLAYER MAC ADDRESS</small><strong>${escapeHtml(info.macAddress || "—")}</strong></div>
